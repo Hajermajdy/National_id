@@ -16,6 +16,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final controllerOfId = TextEditingController();
 
   var box = Hive.box('box');
+  final _keyText1 = GlobalKey<FormState>();
+  final _keyText2 = GlobalKey<FormState>();
   String date = '';
 
   @override
@@ -28,98 +30,120 @@ class _HomeScreenState extends State<HomeScreen> {
             fit: BoxFit.cover
           )
         ),
-        child: Column(
-          // mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.only(
-                top: 270,
-                left: 12,
-                right: 12
-              ),
-              child: Column(
-                children: [
-                  TextFormField(
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white70,
-                        hintText: "Name",
-                        hintStyle: TextStyle(color: Colors.black54,),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide.none
-                        ),
-                      ),
-                      controller: controllerOfName,
-                  ),
-                  SizedBox(
-                    height: 40,
-                  ),
-                  TextFormField(
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white70,
-                        hintText: "National ID",
-                        hintStyle: TextStyle(color: Colors.black54,),
-                        border: OutlineInputBorder(
+        child: Container(
+          padding: EdgeInsets.only(
+            top: 270,
+            left: 12,
+            right: 12
+          ),
+          child: Column(
+            children: [
+              Form(
+                key: _keyText1,
+                child: Column(
+                  children: [
+                    TextFormField(
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white70,
+                          hintText: "Name",
+                          hintStyle: TextStyle(color: Colors.black54,),
+                          border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                             borderSide: BorderSide.none
+                          ),
                         ),
-                      ),
-                      controller: controllerOfId,
-                  ),
-                  SizedBox(
-                    height: 40,
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        box.put("name", controllerOfName.text);
-
-                        if(int.parse(controllerOfId.text[controllerOfId.text.length-2])%2 == 0){
-                          box.put("gender", "Female");
-                          print("female");
-                        }else{
-                          box.put("gender", "male");
-                          print("male");
-                        }
-                        if(controllerOfId.text.toString()[7]=="8" && controllerOfId.text.toString()[8]=='8'){
-                          box.put("governorate", "You not born in Cairo");
-                        }else{
-                          box.put("governorate", "You born in Cairo");
-                        }
-                        if(controllerOfId.text.toString()[0]=='3'){
-                          date+= '20';
-                        }else{
-                          date+= '19';
-                        }
-
-                        for(int i=1; i<7; i++){
-                          if(i%2!=0 && i != 1 ){
-                            date += "-";
+                        controller: controllerOfName,
+                        validator: (value){
+                          if(value!.isEmpty || value==null){
+                            return 'please enter some text';
                           }
-                          date += controllerOfId.text.toString()[i];
-                        }
-
-                        box.put("birthday",date);
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => NationalIdScreen(),)
-                        );
-                      },
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(Colors.white),
-                        shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-                          side: BorderSide(
-                            color: Colors.teal[900]!,
-                            width: 4
-                          )
-                        ))
-                      ),
-                      child: Text("Analyse User Data",style: TextStyle(color: Colors.teal[900]),)),
-                ],
+                        },
+                    ),
+                    SizedBox(
+                      height: 40,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Form(
+                  key: _keyText2,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white70,
+                          hintText: "National ID",
+                          hintStyle: TextStyle(color: Colors.black54,),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              borderSide: BorderSide.none
+                          ),
+                        ),
+                        controller: controllerOfId,
+                        validator: (value) {
+                          if(value!.isEmpty || value==null){
+                            return 'Please Enter Some Text';
+                          }else if(controllerOfId.text.length != 14){
+                            return 'Please Enter Valid National ID';
+                          }
+                        },
+                      ),
+                      SizedBox(
+                        height: 40,
+                      ),
+                    ],
+                  )),
+
+              ElevatedButton(
+                  onPressed: () {
+                    if(_keyText1.currentState!.validate() && _keyText2.currentState!.validate()){
+                      box.put("name", controllerOfName.text);
+
+                      if(int.parse(controllerOfId.text[controllerOfId.text.length-2])%2 == 0){
+                        box.put("gender", "Female");
+                      }else{
+                        box.put("gender", "male");
+                      }
+                      if(controllerOfId.text.toString()[7]=="8" && controllerOfId.text.toString()[8]=='8'){
+                        box.put("governorate", "You not born in Cairo");
+                      }else{
+                        box.put("governorate", "You born in Cairo");
+                      }
+                      if(controllerOfId.text.toString()[0]=='3'){
+                        date+= '20';
+                      }else{
+                        date+= '19';
+                      }
+
+                      for(int i=1; i<7; i++){
+                        if(i%2!=0 && i != 1 ){
+                          date += "-";
+                        }
+                        date += controllerOfId.text.toString()[i];
+                      }
+
+                      box.put("birthday",date);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => NationalIdScreen(),)
+                      );
+                    }
+
+                  },
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStatePropertyAll(Colors.white),
+                      shape: MaterialStatePropertyAll(RoundedRectangleBorder(
+                          side: BorderSide(
+                              color: Colors.teal[900]!,
+                              width: 4
+                          )
+                      ))
+                  ),
+                  child: Text("Analyse User Data",style: TextStyle(color: Colors.teal[900]),)),
+            ],
+          ),
         ),
       ),
     );
